@@ -151,6 +151,7 @@ void CController::Process()
   {
     //possibly new ip address, reset port address
     SetPortAddressFromIp();
+    m_artnet.Initialize();
     EtherCard::dhcp_renewed = false;
   }
 }
