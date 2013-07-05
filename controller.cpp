@@ -92,6 +92,7 @@ void CController::Initialize()
   DBGPRINT("MASK: %i.%i.%i.%i\n", ether.mymask[0], ether.mymask[1], ether.mymask[2], ether.mymask[3]);
 
   SetPortAddressFromIp();
+  EtherCard::dhcp_renewed = false;
   m_artnet.Initialize();
   wdt_reset();
 }
@@ -144,6 +145,13 @@ void CController::Process()
   {
     LEDS.show();
     m_ledshowtime = now;
+  }
+
+  if (EtherCard::dhcp_renewed)
+  {
+    //possibly new ip address, reset port address
+    SetPortAddressFromIp();
+    EtherCard::dhcp_renewed = false;
   }
 }
 
