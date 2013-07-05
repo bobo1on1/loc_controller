@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/wdt.h>
 #include <EtherCard.h>
 #include "controller.h"
 #include "debugprint.h"
@@ -42,53 +43,48 @@ void CController::Initialize()
   //init the led timestamp
   m_ledshowtime = millis();
 
+  //make the reset pin low for 100 ms, to reset the ENC28J60
   pinMode(ETHERRESETPIN, OUTPUT);
+  digitalWrite(ETHERRESETPIN, LOW);
+  delay(100);
+  digitalWrite(ETHERRESETPIN, HIGH);
+  delay(100);
 
-  bool success = false;
-  do
+  wdt_reset();
+  uint8_t mac[] = { 0x70,0x69,0x69,0x2D,0x30,0x31 };
+  if (ether.begin(sizeof(Ethernet::buffer), mac))
   {
-    //make the reset pin low for 100 ms, to reset the ENC28J60
-    digitalWrite(ETHERRESETPIN, LOW);
-    delay(100);
-    digitalWrite(ETHERRESETPIN, HIGH);
-    delay(100);
+    DBGPRINT("Ethernet controller set up\n");
+  }
+  else
+  {
+    DBGPRINT("Failed to set up Ethernet controller\n");
+    for(;;); //wait for the watchdog timer reset
+  }
 
-    uint8_t mac[] = { 0x70,0x69,0x69,0x2D,0x30,0x31 };
-    if (ether.begin(sizeof(Ethernet::buffer), mac))
-    {
-      DBGPRINT("Ethernet controller set up\n");
-    }
-    else
-    {
-      DBGPRINT("Failed to set up Ethernet controller\n");
-      continue;
-    }
+  //delay for the ethernet switch to bring up stuff
+  wdt_reset();
+  delay(5000);
+  wdt_reset();
 
-    //delay for the ethernet switch to bring up stuff
-    delay(5000);
-
-    //enable broadcast for dhcp and art-net
-    ether.enableBroadcast();
+  //enable broadcast for dhcp and art-net
+  ether.enableBroadcast();
 
 #if STATIC
-    ether.staticSetup(myip, gwip);
+  ether.staticSetup(myip, gwip);
 #else
-    DBGPRINT("Requesting ip address using DHCP\n");
+  DBGPRINT("Requesting ip address using DHCP\n");
 
-    if (ether.dhcpSetup())
-    {
-      DBGPRINT("DHCP succeeded\n");
-    }
-    else
-    {
-      DBGPRINT("DHCP failed\n");
-      continue;
-    }
-#endif
-
-    success = true;
+  if (ether.dhcpSetup())
+  {
+    DBGPRINT("DHCP succeeded\n");
   }
-  while (!success);
+  else
+  {
+    DBGPRINT("DHCP failed\n");
+    for(;;); //wait for the watchdog timer reset
+  }
+#endif
 
   DBGPRINT("IP: %i.%i.%i.%i\n", ether.myip[0], ether.myip[1], ether.myip[2], ether.myip[3]);
   DBGPRINT("GW: %i.%i.%i.%i\n", ether.gwip[0], ether.gwip[1], ether.gwip[2], ether.gwip[3]);
@@ -96,8 +92,8 @@ void CController::Initialize()
   DBGPRINT("MASK: %i.%i.%i.%i\n", ether.mymask[0], ether.mymask[1], ether.mymask[2], ether.mymask[3]);
 
   SetPortAddressFromIp();
-
   m_artnet.Initialize();
+  wdt_reset();
 }
 
 void CController::SetPortAddressFromIp()
@@ -135,8 +131,15 @@ void CController::SetPortAddressFromIp()
 void CController::Process()
 {
   uint32_t now = millis();
+
+  //if valid art-net data has been received in the last minute,
+  //reset the watchdog timer
+  if (now - m_artnet.ValidDataTime() < 60000)
+    wdt_reset();
+
   m_artnet.Process(now);
 
+  //transmit data to the leds at least once per second, to make sure they stay on
   if (now - m_ledshowtime >= 1000)
   {
     LEDS.show();

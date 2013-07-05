@@ -241,11 +241,12 @@ class CArtNet
 {
   public:
     CArtNet(CController& controller, uint8_t* buf, uint8_t* ip, uint8_t* mac);
-    void Initialize();
-    void Process(uint32_t now);
-    void SetPortAddress(uint16_t portaddress) { m_portaddress = portaddress; }
-    void SetPollReplyDelay(uint16_t delay)    { m_sendpollreplydelay = delay;    }
-    void HandlePacket(byte ip[4], uint8_t* data, uint16_t len);
+    void     Initialize();
+    void     Process(uint32_t now);
+    void     SetPortAddress(uint16_t portaddress) { m_portaddress = portaddress; }
+    void     SetPollReplyDelay(uint16_t delay)    { m_sendpollreplydelay = delay;    }
+    void     HandlePacket(byte ip[4], uint8_t* data, uint16_t len);
+    uint32_t ValidDataTime() { return m_validdatatime; }
 
   private:
     void HandlePoll(byte ip[4], uint8_t* data, uint16_t len);
@@ -261,6 +262,7 @@ class CArtNet
     bool         m_sendpollreply;
     uint32_t     m_sendpollreplytime;
     uint16_t     m_sendpollreplydelay;
+    uint32_t     m_validdatatime;
 };
 
 #endif //ARTNET_H

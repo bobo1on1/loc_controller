@@ -1,3 +1,4 @@
+#include <avr/wdt.h>
 #include <EtherCard.h>
 #include <IPAddress.h>
 #include "controller.h"
@@ -7,6 +8,7 @@ CController g_controller;
 
 void setup()
 {
+  SetupWatchdog();
   SetupDebug();
   DBGPRINT("board started\n");
 
@@ -28,6 +30,17 @@ static int uart_putchar (char c, FILE *stream)
     return 0 ;
 }
 #endif
+
+void SetupWatchdog()
+{
+  //the WDTON fuse should be programmed to 0 in the high fuse byte,
+  //to make the watchdog timer permanently enabled
+  //here the watchdog timer is set to the comfortable timeout of 8 seconds
+  cli();
+  wdt_reset();
+  wdt_enable(WDTO_8S);
+  sei();
+}
 
 void SetupDebug()
 {
