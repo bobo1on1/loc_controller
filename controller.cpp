@@ -19,6 +19,7 @@ CController::CController() : m_artnet(*this, Ethernet::buffer + UDP_DATA_P, ethe
 #define DATAPIN 4
 #define CLOCKPIN 1
 #define SELECTPIN 6
+#define ETHERRESETPIN 9
 
 void CController::Initialize()
 {
@@ -41,14 +42,15 @@ void CController::Initialize()
   //init the led timestamp
   m_ledshowtime = millis();
 
+  pinMode(ETHERRESETPIN, OUTPUT);
+
   bool success = false;
   do
   {
     //make the reset pin low for 100 ms, to reset the ENC28J60
-    pinMode(9, OUTPUT);
-    digitalWrite(9, LOW);
+    digitalWrite(ETHERRESETPIN, LOW);
     delay(100);
-    digitalWrite(9, HIGH);
+    digitalWrite(ETHERRESETPIN, HIGH);
     delay(100);
 
     uint8_t mac[] = { 0x70,0x69,0x69,0x2D,0x30,0x31 };
