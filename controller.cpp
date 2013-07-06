@@ -17,8 +17,8 @@ CController::CController() : m_artnet(*this, Ethernet::buffer + UDP_DATA_P, ethe
 {
 }
 
-#define DATAPIN 4
-#define CLOCKPIN 1
+#define DATAPIN 1
+#define CLOCKPIN 4
 #define SELECTPIN 6
 #define ETHERRESETPIN 9
 
