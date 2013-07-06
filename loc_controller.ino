@@ -14,6 +14,10 @@ void setup()
 
   g_controller.Initialize();
   ether.udpServerListenOnPort(&UdpArtNet, ARTNETPORT);
+  //when data is received on one port lower than the art-net port
+  //the artpollreply is sent as unicast, this is to prevent filling up the buffers
+  //of all art-net controllers on the network
+  ether.udpServerListenOnPort(&UdpArtNet, ARTNETPORT - 1);
 }
 
 void loop()
@@ -80,7 +84,7 @@ void UdpArtNet(word port, byte ip[4], const char* data, word len)
   DBGPRINTAUX("\n");
 #endif
 
-  g_controller.HandlePacket(ip, (uint8_t*)data, len);
+  g_controller.HandlePacket(ip, port, (uint8_t*)data, len);
 }
 
 void Transmit(uint8_t* data, uint16_t size, uint16_t sourceport, const uint8_t* destip, uint16_t destport)

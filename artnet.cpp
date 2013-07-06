@@ -167,7 +167,7 @@ void CArtNet::Process(uint32_t now)
   }
 }
 
-void CArtNet::HandlePacket(byte ip[4], uint8_t* data, uint16_t len)
+void CArtNet::HandlePacket(byte ip[4], uint16_t port, uint8_t* data, uint16_t len)
 {
   //test if the first bytes are "Art-Net", including the null terminator
   if (len < 10 || strncmp((const char*)data, g_artnetstr, sizeof(g_artnetstr)) != 0)
@@ -182,14 +182,14 @@ void CArtNet::HandlePacket(byte ip[4], uint8_t* data, uint16_t len)
   DBGPRINT("Opcode: %u: %S\n", opcode, OpcodeToStr(opcode));
 
   if (opcode == OpPoll)
-    HandlePoll(ip, data, len);
+    HandlePoll(ip, port, data, len);
   else if (opcode == OpOutput)
     HandleOutput(data, len);
   else
     DBGPRINT("Unhandled packet with opcode %u:%S\n", opcode, OpcodeToStr(opcode));
 }
 
-void CArtNet::HandlePoll(byte ip[4], uint8_t* data, uint16_t len)
+void CArtNet::HandlePoll(byte ip[4], uint16_t port, uint8_t* data, uint16_t len)
 {
   if (len < sizeof(SArtPoll))
   {
@@ -209,11 +209,19 @@ void CArtNet::HandlePoll(byte ip[4], uint8_t* data, uint16_t len)
   //data is valid, reset the timestamp
   m_validdatatime = millis();
 
-  //schedule a send of an ArtPollReply packet, if not already done
-  if (!m_sendpollreply)
+  if (port == ARTNETPORT)
   {
-    m_sendpollreply = true;
-    m_sendpollreplytime = millis();
+    //schedule a send of an ArtPollReply packet, if not already done
+    if (!m_sendpollreply)
+    {
+      m_sendpollreply = true;
+      m_sendpollreplytime = millis();
+    }
+  }
+  else
+  {
+    //send an artpollreply as unicast
+    SendPollReply(ip);
   }
 }
 
@@ -254,7 +262,7 @@ void CArtNet::HandleOutput(uint8_t* data, uint16_t len)
   m_controller.OnDmxData(dmxmsg->Data, length);
 }
 
-void CArtNet::SendPollReply()
+void CArtNet::SendPollReply(uint8_t* ip /*= NULL*/)
 {
   DBGPRINT("Sending PollReply\n");
 
@@ -313,6 +321,11 @@ void CArtNet::SendPollReply()
   reply->Status2.ProductSupportsWebBrowserConfiguration = 0;
   memset(reply->Filler, 0, sizeof(reply->Filler));
   
-  m_controller.Transmit(m_transmitbuf, sizeof(SArtPollReply), ARTNETPORT, g_broadcastaddress, ARTNETPORT);
+  //if ip is not set, send it to the broadcast address
+  //if it is set, send it as unicast at art-net port minus one
+  if (!ip)
+    m_controller.Transmit(m_transmitbuf, sizeof(SArtPollReply), ARTNETPORT, g_broadcastaddress, ARTNETPORT);
+  else
+    m_controller.Transmit(m_transmitbuf, sizeof(SArtPollReply), ARTNETPORT - 1, ip, ARTNETPORT - 1);
 }
 

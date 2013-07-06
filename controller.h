@@ -15,7 +15,7 @@ class CController
 
     void    Initialize();
     void    Process();
-    void    HandlePacket(byte ip[4], uint8_t* data, uint16_t len);
+    void    HandlePacket(byte ip[4], uint16_t port, uint8_t* data, uint16_t len);
     void    Transmit(uint8_t* data, uint16_t size, uint16_t sourceport, const uint8_t* destip, uint16_t destport);
     void    OnDmxData(uint8_t* data, uint16_t channels);
 

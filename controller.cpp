@@ -156,9 +156,9 @@ void CController::Process()
   }
 }
 
-void CController::HandlePacket(byte ip[4], uint8_t* data, uint16_t len)
+void CController::HandlePacket(byte ip[4], uint16_t port, uint8_t* data, uint16_t len)
 {
-  m_artnet.HandlePacket(ip, data, len);
+  m_artnet.HandlePacket(ip, port, data, len);
 }
 
 void CController::Transmit(uint8_t* data, uint16_t size, uint16_t sourceport, const uint8_t* destip, uint16_t destport)

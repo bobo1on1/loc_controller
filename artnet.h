@@ -245,14 +245,14 @@ class CArtNet
     void     Process(uint32_t now);
     void     SetPortAddress(uint16_t portaddress) { m_portaddress = portaddress; }
     void     SetPollReplyDelay(uint16_t delay)    { m_sendpollreplydelay = delay;    }
-    void     HandlePacket(byte ip[4], uint8_t* data, uint16_t len);
+    void     HandlePacket(byte ip[4], uint16_t port, uint8_t* data, uint16_t len);
     uint32_t ValidDataTime() { return m_validdatatime; }
 
   private:
-    void HandlePoll(byte ip[4], uint8_t* data, uint16_t len);
+    void HandlePoll(byte ip[4], uint16_t port, uint8_t* data, uint16_t len);
     void HandleOutput(uint8_t* data, uint16_t len);
 
-    void SendPollReply();
+    void SendPollReply(uint8_t* ip = NULL);
 
     CController& m_controller;
     uint8_t*     m_transmitbuf;
