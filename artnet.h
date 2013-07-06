@@ -246,7 +246,6 @@ class CArtNet
     void     SetPortAddress(uint16_t portaddress) { m_portaddress = portaddress; }
     void     SetPollReplyDelay(uint16_t delay)    { m_sendpollreplydelay = delay;    }
     void     HandlePacket(byte ip[4], uint16_t port, uint8_t* data, uint16_t len);
-    uint32_t ValidDataTime() { return m_validdatatime; }
 
   private:
     void HandlePoll(byte ip[4], uint16_t port, uint8_t* data, uint16_t len);
@@ -262,7 +261,6 @@ class CArtNet
     bool         m_sendpollreply;
     uint32_t     m_sendpollreplytime;
     uint16_t     m_sendpollreplydelay;
-    uint32_t     m_validdatatime;
 };
 
 #endif //ARTNET_H

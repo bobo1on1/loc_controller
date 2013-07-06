@@ -95,6 +95,9 @@ void CController::Initialize()
   EtherCard::dhcp_renewed = false;
   m_artnet.Initialize();
   wdt_reset();
+
+  //init last valid data timestamp
+  m_validdatatime = millis();
 }
 
 void CController::SetPortAddressFromIp()
@@ -135,7 +138,7 @@ void CController::Process()
 
   //if valid art-net data has been received in the last minute,
   //reset the watchdog timer
-  if (now - m_artnet.ValidDataTime() < 60000)
+  if (now - m_validdatatime < 60000)
     wdt_reset();
 
   m_artnet.Process(now);
@@ -171,5 +174,11 @@ void CController::OnDmxData(uint8_t* data, uint16_t channels)
   memcpy(m_leds, data, min(channels, sizeof(m_leds)));
   LEDS.show();
   m_ledshowtime = millis();
+}
+
+void CController::OnValidData()
+{
+  m_validdatatime = millis();
+  wdt_reset();
 }
 

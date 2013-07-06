@@ -152,9 +152,6 @@ void CArtNet::Initialize()
 {
   //ArtPollReply needs to be sent when the controller comes online
   SendPollReply();
-
-  //init last valid data timestamp
-  m_validdatatime = millis();
 }
 
 void CArtNet::Process(uint32_t now)
@@ -206,8 +203,8 @@ void CArtNet::HandlePoll(byte ip[4], uint16_t port, uint8_t* data, uint16_t len)
            PSTR("in reponse to ArtPoll or ArtAddress only"));
   DBGPRINT("Priority code: %u:%S\n", pollmsg->Priority, PriorityCodeToStr(pollmsg->Priority));
 
-  //data is valid, reset the timestamp
-  m_validdatatime = millis();
+  //data is valid
+  m_controller.OnValidData();
 
   if (port == ARTNETPORT)
   {
@@ -242,8 +239,8 @@ void CArtNet::HandleOutput(uint8_t* data, uint16_t len)
     return;
   }
 
-  //data is valid, reset the timestamp
-  m_validdatatime = millis();
+  //data is valid
+  m_controller.OnValidData();
 
   DBGPRINT("Received dmx output for my universe %u\n", portaddress);
 
