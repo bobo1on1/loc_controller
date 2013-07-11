@@ -80,14 +80,19 @@ void CController::Initialize()
 #else
   DBGPRINT("Requesting ip address using DHCP\n");
 
-  if (ether.dhcpSetup())
+  //try dhcp 5 times before doing a watchdog timer reset
+  for (uint8_t i = 0; i < 5; i++)
   {
-    DBGPRINT("DHCP succeeded\n");
-  }
-  else
-  {
-    DBGPRINT("DHCP failed\n");
-    for(;;); //wait for the watchdog timer reset
+    if (ether.dhcpSetup())
+    {
+      DBGPRINT("DHCP succeeded\n");
+    }
+    else
+    {
+      DBGPRINT("DHCP failed\n");
+      if (i == 4)
+        for(;;); //wait for the watchdog timer reset
+    }
   }
 #endif
 
