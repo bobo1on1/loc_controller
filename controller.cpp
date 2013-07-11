@@ -32,12 +32,17 @@ void CController::Initialize()
 
   //add led chip based on jumper position
   if (digitalRead(SELECTPIN))
+  {
     LEDS.addLeds<WS2811, DATAPIN, GRB>(m_leds, NUM_LEDS); //led strip
+    memset(m_leds, 0x10, sizeof(m_leds)); //led strip can't handle full white
+  }
   else
+  {
     LEDS.addLeds<WS2801, DATAPIN, CLOCKPIN, BRG>(m_leds, NUM_LEDS); //led pixel
+    memset(m_leds, 0xFF, sizeof(m_leds));
+  }
 
   //make all leds white
-  memset(m_leds, 0xFF, sizeof(m_leds));
   LEDS.show();
 
   //init the led timestamp
