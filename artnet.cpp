@@ -288,7 +288,7 @@ void CArtNet::SendPollReply(uint8_t* ip /*= NULL*/)
   strcpy((char*)reply->LongName, "LED strip controller for OHM 2013");
   memset(reply->NodeReport, 0, sizeof(reply->NodeReport));
   reply->NumPortsHi = 0;
-  reply->NumPortsLo = 1;
+  reply->NumPortsLo = 2;
   reply->PortTypes[0].CanOutputDataFromArtNet = 1;
   reply->PortTypes[0].CanInputDataToArtNet = 0;
   reply->PortTypes[0].Type = DMX512;
