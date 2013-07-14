@@ -33,7 +33,7 @@ void CController::Initialize()
   //add led chip based on jumper position
   if (digitalRead(SELECTPIN))
   {
-    LEDS.addLeds<WS2811, DATAPIN, GRB>(m_leds, NUM_LEDS); //led strip
+    LEDS.addLeds<WS2812B, DATAPIN, GRB>(m_leds, NUM_LEDS); //led strip
     memset(m_leds, 0x10, sizeof(m_leds)); //led strip can't handle full white
   }
   else
