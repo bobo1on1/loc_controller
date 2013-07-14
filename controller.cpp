@@ -86,6 +86,7 @@ void CController::Initialize()
     if (ether.dhcpSetup())
     {
       DBGPRINT("DHCP succeeded\n");
+      break;
     }
     else
     {
